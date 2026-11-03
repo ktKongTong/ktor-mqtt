@@ -20,6 +20,7 @@ kotlin {
     explicitApi()
     jvm()
     linuxArm64()
+    linuxX64()
 
     android {
         namespace = "de.kempmobil.ktor.mqtt.client"

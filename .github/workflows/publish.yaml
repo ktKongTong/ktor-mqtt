@@ -13,7 +13,8 @@ permissions:
 jobs:
   publish:
     # macOS arm64 runners are capacity-constrained (15 min queue timeout),
-    # so cross-compile linuxArm64 from an x64 Linux host instead.
+    # so build both Linux targets on an x64 Linux host: linuxX64 natively and
+    # linuxArm64 via cross-compilation.
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +33,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Publish linuxArm64 artifacts
+      - name: Publish Linux artifacts
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,6 +42,8 @@ jobs:
           ./gradlew
           :mqtt-core:publishKotlinMultiplatformPublicationToGitHubPackagesRepository
           :mqtt-core:publishLinuxArm64PublicationToGitHubPackagesRepository
+          :mqtt-core:publishLinuxX64PublicationToGitHubPackagesRepository
           :mqtt-client:publishKotlinMultiplatformPublicationToGitHubPackagesRepository
           :mqtt-client:publishLinuxArm64PublicationToGitHubPackagesRepository
+          :mqtt-client:publishLinuxX64PublicationToGitHubPackagesRepository
           --no-configuration-cache

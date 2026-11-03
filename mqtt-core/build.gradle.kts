@@ -19,6 +19,7 @@ kotlin {
     explicitApi()
     jvm()
     linuxArm64()
+    linuxX64()
     android {
         namespace = "de.kempmobil.ktor.mqtt"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
