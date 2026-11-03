@@ -12,7 +12,9 @@ permissions:
 
 jobs:
   publish:
-    runs-on: macos-latest
+    # macOS arm64 runners are capacity-constrained (15 min queue timeout),
+    # so cross-compile linuxArm64 from an x64 Linux host instead.
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
