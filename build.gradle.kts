@@ -1,5 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import org.gradle.api.publish.PublishingExtension
 
 plugins {
     //trick: for the same plugin versions in all sub-modules
@@ -40,14 +41,13 @@ kover {
 
 allprojects {
     plugins.withId("com.vanniktech.maven.publish.base") {
+        val ghRepo = providers.environmentVariable("GITHUB_REPOSITORY").orNull ?: "ktKongTong/ktor-mqtt"
         configure<MavenPublishBaseExtension> {
-            publishToMavenCentral()
-            signAllPublications()
             pom {
                 name = "Ktor MQTT"
                 description = "A modern multiplatform Kotlin MQTT 5 client library."
                 inceptionYear = "2024"
-                url = "https://github.com/ukemp/ktor-mqtt/"
+                url = "https://github.com/$ghRepo/"
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -57,15 +57,34 @@ allprojects {
                 }
                 developers {
                     developer {
-                        id.set("ukemp")
-                        name.set("Ulrich Kemp")
-                        url.set("https://github.com/ukemp/")
+                        id.set("ktKongTong")
+                        name.set("ktKongTong")
+                        url.set("https://github.com/ktKongTong/")
                     }
                 }
                 scm {
-                    url.set("https://github.com/ukemp/ktor-mqtt/")
-                    connection.set("scm:git:git://github.com/ukemp/ktor-mqtt.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/ukemp/ktor-mqtt.git")
+                    url.set("https://github.com/$ghRepo/")
+                    connection.set("scm:git:git://github.com/$ghRepo.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/$ghRepo.git")
+                }
+            }
+        }
+
+        val ghUser = providers.environmentVariable("GITHUB_ACTOR").orNull
+            ?: providers.gradleProperty("gpr.user").orNull
+        val ghToken = providers.environmentVariable("GITHUB_TOKEN").orNull
+            ?: providers.gradleProperty("gpr.key").orNull
+        if (ghUser != null && ghToken != null) {
+            configure<PublishingExtension> {
+                repositories {
+                    maven {
+                        name = "GitHubPackages"
+                        url = uri("https://maven.pkg.github.com/$ghRepo")
+                        credentials {
+                            username = ghUser
+                            password = ghToken
+                        }
+                    }
                 }
             }
         }

@@ -1,13 +1,17 @@
----
-name: Publish Ktor MQTT Library
+name: Publish to GitHub Packages
+
 on:
   push:
     tags:
       - '**'
-env:
-  ACTIONS_RUNNER_DEBUG: true
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  build:
+  publish:
     runs-on: macos-latest
 
     steps:
@@ -21,15 +25,20 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: "zulu"
+          distribution: 'temurin'
 
-      - name: Setup Gradle cache
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build with Gradle
+      - name: Publish linuxArm64 artifacts
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToMavenCentral --no-configuration-cache
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: >
+          ./gradlew
+          :mqtt-core:publishKotlinMultiplatformPublicationToGitHubPackagesRepository
+          :mqtt-core:publishLinuxArm64PublicationToGitHubPackagesRepository
+          :mqtt-client:publishKotlinMultiplatformPublicationToGitHubPackagesRepository
+          :mqtt-client:publishLinuxArm64PublicationToGitHubPackagesRepository
+          --no-configuration-cache

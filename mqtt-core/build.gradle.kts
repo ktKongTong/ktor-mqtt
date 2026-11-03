@@ -18,6 +18,7 @@ plugins {
 kotlin {
     explicitApi()
     jvm()
+    linuxArm64()
     android {
         namespace = "de.kempmobil.ktor.mqtt"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -86,7 +87,7 @@ dokka {
 }
 
 // Do not delete nor move to the root script, otherwise iOS artifact will miss these values
-group = "de.kempmobil.ktor.mqtt"
+group = "dev.koft.ktor-mqtt"
 version = libs.versions.ktormqtt.get()
 
 mavenPublishing {
