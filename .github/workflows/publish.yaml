@@ -11,7 +11,7 @@ permissions:
   packages: write
 
 jobs:
-  publish:
+  publish-linux:
     # macOS arm64 runners are capacity-constrained (15 min queue timeout),
     # so build both Linux targets on an x64 Linux host: linuxX64 natively and
     # linuxArm64 via cross-compilation.
@@ -47,3 +47,37 @@ jobs:
           :mqtt-client:publishLinuxArm64PublicationToGitHubPackagesRepository
           :mqtt-client:publishLinuxX64PublicationToGitHubPackagesRepository
           --no-configuration-cache
+
+  publish-macos-arm64:
+    # Apple targets must be built on a macOS host. The shared module metadata
+    # is published by publish-linux, so this job uploads only the target
+    # publication to avoid a duplicate (409) write at the same coordinates.
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish macOS arm64 artifacts
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: >
+          ./gradlew
+          :mqtt-core:publishMacosArm64PublicationToGitHubPackagesRepository
+          :mqtt-client:publishMacosArm64PublicationToGitHubPackagesRepository
+          --no-configuration-cache
+
